@@ -2,31 +2,24 @@
 
   'use strict';
 
-  angular.module('pdf', []).directive('ngPdf', function($window) {
+  angular.module('pdf', []).directive('pdfJs', function($window) {
     return {
-      restrict: 'E',
-      templateUrl: function(element, attr) {
-        return attr.templateUrl ? attr.templateUrl : 'partials/viewer.html'
-      },
+      restrict: 'A',
       link: function (scope, element, attrs) {
-        var url = scope.pdfUrl,
+        var url = scope.$eval(attrs.pdfUrl),
           pdfDoc = null,
-          pageNum = 1,
+          pageIndex = 1,
           scale = 1,
-          canvas = document.getElementById('pdf-canvas'),
-          ctx = canvas.getContext('2d'),
-          windowEl = angular.element($window);
+          canvas = element[0],
+          ctx = canvas.getContext('2d');
 
-        windowEl.on('scroll', function() {
-          scope.$apply(function() {
-            scope.scroll = windowEl[0].scrollY;
-          });
-        });
+        scope[attrs.pdfJs] = {};
+        var obj = scope[attrs.pdfJs];
 
         PDFJS.disableWorker = true;
-        scope.pageNum = pageNum;
+        obj.pageIndex = pageIndex;
 
-        scope.renderPage = function(num) {
+        obj.renderPage = function(num) {
 
           pdfDoc.getPage(num).then(function(page) {
             var viewport = page.getViewport(scale);
@@ -42,60 +35,50 @@
 
           });
 
-          scope.pageCount = pdfDoc.numPages;
+          obj.pageCount = pdfDoc.numPages;
         };
 
-        scope.goPrevious = function() {
-          if (scope.pageNum <= 1)
+        obj.previous = function() {
+          if (obj.pageIndex <= 1)
             return;
-          scope.pageNum = parseInt(scope.pageNum, 10) - 1;
+          obj.pageIndex = parseInt(obj.pageIndex, 10) - 1;
+          obj.refresh();
         };
 
-        scope.goNext = function() {
-          if (scope.pageNum >= pdfDoc.numPages)
+        obj.next = function() {
+          if (obj.pageIndex >= pdfDoc.numPages)
             return;
-          scope.pageNum = parseInt(scope.pageNum, 10) + 1;
+          obj.pageIndex = parseInt(obj.pageIndex, 10) + 1;
+          obj.refresh();
         };
 
-        scope.zoomIn = function() {
+        obj.zoomIn = function() {
           scale += 0.2;
-          scope.renderPage(scope.pageNum);
+          obj.renderPage(obj.pageIndex);
           return scale;
         };
 
-        scope.zoomOut = function() {
+        obj.zoomOut = function() {
           scale -= 0.2;
-          scope.renderPage(scope.pageNum);
+          obj.renderPage(obj.pageIndex);
           return scale;
         };
 
-        scope.changePage = function() {
-          scope.renderPage(scope.pageNum);
-        };
-
-        scope.rotate = function() {
-          if (canvas.getAttribute('class') === 'rotate0') {
-            canvas.setAttribute('class', 'rotate90');
-          } else if (canvas.getAttribute('class') === 'rotate90') {
-            canvas.setAttribute('class', 'rotate180');
-          } else if (canvas.getAttribute('class') === 'rotate180') {
-            canvas.setAttribute('class', 'rotate270');
-          } else {
-            canvas.setAttribute('class', 'rotate0');
+        obj.refresh = function() {
+          if(obj.pageIndex > pdfDoc.numPages) {
+              obj.pageIndex = pdfDoc.numPages;
           }
+          if(obj.pageIndex < 1) {
+              obj.pageIndex = 1;
+          }
+          obj.renderPage(obj.pageIndex);
         };
 
         PDFJS.getDocument(url).then(function (_pdfDoc) {
-          scope.pageCount = _pdfDoc.numPages;
+          obj.pageCount = _pdfDoc.numPages;
           pdfDoc = _pdfDoc;
-          scope.renderPage(scope.pageNum);
+          obj.renderPage(obj.pageIndex);
         });
-
-        scope.$watch('pageNum', function (newVal) {
-          if (pdfDoc !== null)
-            scope.renderPage(newVal);
-        });
-
       }
     };
   });

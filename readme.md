@@ -13,11 +13,8 @@ Integrate PDF files right into web pages.
 
 1. next / previous page
 1. zoom in / out
-1. rotate clockwise
 1. jump to a page number
-1. when scrolling, the pdf controls will get fixed position at the top
-1. define the view template
-1. define the path to pdf with scope variable
+1. define the path to pdf attribute
 
 ##Requirements
 
@@ -28,9 +25,6 @@ Integrate PDF files right into web pages.
 
 1. install or copy over the file `dist/angular-pdf.min.js` or `dist/angular-pdf.js`
 
-    ```
-    bower install angular-pdf
-    ```
 1. include the path to the direcitve file in `index.html`
 
     ```
@@ -46,20 +40,8 @@ Integrate PDF files right into web pages.
 
     ```
     <div class="wrapper" ng-controller="DocCtrl">
-        <ng-pdf template-url="/partials/viewer.html"></ng-pdf>
+        <canvas pdf-js="pdfViewer" pdf-url="/url/to/file.pdf"></canvas>
     </div>
-    ```
-1. include the `canvas` element to display the pdf in the template-url file
-
-    ```
-    <canvas id="pdf-canvas"></canvas>
-    ```
-1. include the path to the pdf file in the controller
-
-    ```
-    app.controller('DocCtrl', function($scope) {
-        $scope.pdfUrl = '/pdf/relativity.pdf';
-    });
     ```
 
 ###Options
@@ -67,52 +49,21 @@ Integrate PDF files right into web pages.
 1. **Next / Previous page**: Include the controls in the view file as defined in the attribute `template-url`
 
     ```
-    <button ng-click="goPrevious()"><</span></button>
-    <button ng-click="goNext()">></span></button>
+    <button ng-click="pdfViewer.previous()"><</span></button>
+    <button ng-click="pdfViewer.next()">></span></button>
     ```
 1. **Zoom in / out**: Include the controls in the view file as defined in the attribute `template-url`
 
     ```
-    <button ng-click="zoomIn()">+</span></button>
-    <button ng-click="zoomOut()">-</span></button>
-    ```
-1. **Rotate clockwise**: Include the controls in the view file as defined in the attribute `template-url` and the initial class `rotate0`
-
-    ```
-    <button ng-click="rotate()">90</span></button>
-    ...
-    <canvas id="pdf-canvas" class="rotate0"></canvas>
+    <button ng-click="pdfViewer.zoomIn()">+</span></button>
+    <button ng-click="pdfViewer.zoomOut()">-</span></button>
     ```
 
-    include the css styles:
-
-    ```
-    .rotate0 {-webkit-transform: rotate(0deg); transform: rotate(0deg); }
-    .rotate90 {-webkit-transform: rotate(90deg); transform: rotate(90deg); }
-    .rotate180 {-webkit-transform: rotate(180deg); transform: rotate(180deg); }
-    .rotate270 {-webkit-transform: rotate(270deg); transform: rotate(270deg); }
-    ```
 1. **Jump to page number**: Include the controls in the view file as defined in the attribute `template-url`
 
     ```
-    <span>Page: </span><input type="text" min=1 ng-model="pageNum"><span> / {{pageCount}}</span>
+    <span>Page: </span><input type="text" min=1 ng-model="pdfViewer.pageNum"><span> / {{pageCount}}</span>
     ```
-1. **Fixed pdf controls upon scrolling**: Wrap the controls in the view file as defined in the attribute `template-url` with a tag `nav` with an `ng-class`. Amend the scroll amount as required.
-
-    ```
-    <nav ng-class="{'pdf-controls fixed': scroll > 100, 'pdf-controls': scroll <= 100}">
-    ...
-    </nav>
-    ```
-
-    And include the relevant css styles as required:
-
-    ```
-    .pdf-controls { width: 100%; display: block; background: #eee; padding: 1em;}
-    .fixed { position: fixed; top: 0; left: calc(50% - 480px); z-index: 100; width: 100%; padding: 1em; background: rgba(238, 238, 238,.9); width: 960px; }
-    ```
-1. open the file `index.html` with a web server
-
 
 ##Similar projects
 
