@@ -16,10 +16,12 @@
         scope[attrs.pdfJs] = {};
         var obj = scope[attrs.pdfJs];
 
-        PDFJS.disableWorker = true;
+        //PDFJS.disableWorker = true;
         obj.pageIndex = pageIndex;
+        obj.rendering = false;
 
         obj.renderPage = function(num) {
+          obj.rendering = true;
 
           pdfDoc.getPage(num).then(function(page) {
             var viewport = page.getViewport(scale);
@@ -31,7 +33,9 @@
               viewport: viewport
             };
 
-            page.render(renderContext);
+            page.render(renderContext).then(function(){
+              obj.rendering = false;
+            });
 
           });
 
